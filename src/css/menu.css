@@ -1,0 +1,17 @@
+.menu .ant-menu-horizontal{
+	background: black;
+	text-align: center;
+}
+.menu .ant-menu-horizontal img{
+	height: 45px;
+}
+ .menu .ant-menu-horizontal .ant-menu-item {
+ 	color: white;
+ 	/*width: 70px;*/
+ 	height: 72px;
+ 	padding-top: 19px;
+ }
+ .ant-menu-item :hover {
+ 	background: white;
+ 	color: black;
+ }
