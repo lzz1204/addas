@@ -11,7 +11,18 @@
  	height: 72px;
  	padding-top: 19px;
  }
- .ant-menu-item :hover {
+ /*.ant-menu-item :hover {
  	background: white;
  	color: black;
+ }*/
+ .menu .user {
+ 	float: right;
+ 	margin-top: -50px;
+ }
+ .menu .ant-btn{
+ 	margin-right: 25px;
+ }
+ .menu .ant-dropdown-trigger{
+ 	float: right;
+ 	margin-top: -50px;
  }

@@ -1,43 +1,26 @@
-import React,{Componrnt} from "react";
-import { Form, Input, Tooltip, Icon, Cascader, Select, Row, Col, Checkbox, Button, AutoComplete } from 'antd';
+import React,{Component} from "react";
+import { Form, Input,  Select, Button, } from 'antd';
+import {captcha} from "../service/api";
+import PropTypes from "prop-types";
 const FormItem = Form.Item;
 const Option = Select.Option;
-const AutoCompleteOption = AutoComplete.Option;
 
-const residences = [{
-  value: 'zhejiang',
-  label: 'Zhejiang',
-  children: [{
-    value: 'hangzhou',
-    label: 'Hangzhou',
-    children: [{
-      value: 'xihu',
-      label: 'West Lake',
-    }],
-  }],
-}, {
-  value: 'jiangsu',
-  label: 'Jiangsu',
-  children: [{
-    value: 'nanjing',
-    label: 'Nanjing',
-    children: [{
-      value: 'zhonghuamen',
-      label: 'Zhong Hua Men',
-    }],
-  }],
-}];
-
-class RegistrationForm extends React.Component {
+class RegistrationForm extends Component {
+  static propTypes = {
+    isFetching:PropTypes.bool.isRequired,
+    signup:PropTypes.func.isRequired,
+    error:PropTypes.bool,
+  }
   state = {
     confirmDirty: false,
-    autoCompleteResult: [],
+    captcha: "",
   };
   handleSubmit = (e) => {
     e.preventDefault();
     this.props.form.validateFieldsAndScroll((err, values) => {
       if (!err) {
         console.log('Received values of form: ', values);
+        this.props.signup(values);
       }
     });
   }
@@ -48,7 +31,7 @@ class RegistrationForm extends React.Component {
   checkPassword = (rule, value, callback) => {
     const form = this.props.form;
     if (value && value !== form.getFieldValue('password')) {
-      callback('Two passwords that you enter is inconsistent!');
+      callback('两次输入的密码不相同!');
     } else {
       callback();
     }
@@ -60,20 +43,22 @@ class RegistrationForm extends React.Component {
     }
     callback();
   }
-
-  handleWebsiteChange = (value) => {
-    let autoCompleteResult;
-    if (!value) {
-      autoCompleteResult = [];
-    } else {
-      autoCompleteResult = ['.com', '.org', '.net'].map(domain => `${value}${domain}`);
-    }
-    this.setState({ autoCompleteResult });
+  getCaptcha(){
+    captcha().then((data)=>{
+      console.log("cap",data);
+      this.setState({
+        captcha:data.captcha
+      })
+    })
   }
-
+  // componentDidMount(){
+  //   this.getCaptcha();
+  // }
+  componentDidMount() {
+    this.getCaptcha();
+  }
   render() {
     const { getFieldDecorator } = this.props.form;
-    const { autoCompleteResult } = this.state;
 
     const formItemLayout = {
       labelCol: {
@@ -105,12 +90,12 @@ class RegistrationForm extends React.Component {
         <Option value="87">+87</Option>
       </Select>
     );
-
-    const websiteOptions = autoCompleteResult.map(website => (
-      <AutoCompleteOption key={website}>{website}</AutoCompleteOption>
-    ));
-
+    const capImg = (
+      <img src={"data:images/jpg;base64,"+this.state.captcha
+    } style={{height:28}} alt="验证码" onClick={this.getCaptcha.bind(this)}/>
+      )
     return (
+      <div style={{marginTop:30}}>
       <Form onSubmit={this.handleSubmit}>
       	 <FormItem
           {...formItemLayout}
@@ -119,12 +104,15 @@ class RegistrationForm extends React.Component {
         >
           {getFieldDecorator('username', {
             rules: [{
-              required: true, message: 'Please input your username!',
-            }, {
-              validator: this.checkConfirm,
-            }],
+              required: true, message: '用户名不能为空!',
+            },
+            {
+              pattern: /[a-zA-Z][0-9A-Za-z-_]{3,19}/, message: "用户名必须是字母开头，包含字母、数字的4~20的字符串"
+            }
+             ],
+             validateTrigger: "onBlur"
           })(
-            <Input type="username" />
+            <Input  />
           )}
         </FormItem>
         <FormItem
@@ -135,9 +123,15 @@ class RegistrationForm extends React.Component {
           {getFieldDecorator('password', {
             rules: [{
               required: true, message: 'Please input your password!',
-            }, {
+            },
+            {
+              pattern: /((?=.*[\d])(?=.*[^\d])).{8,}|((?=.*[^A-Za-z])(?=.*[a-zA-Z])).{8,}/,
+              message: "密码必须符合复杂性要求"
+            },
+             {
               validator: this.checkConfirm,
             }],
+            validateTrigger: "onBlur"
           })(
             <Input type="password" />
           )}
@@ -150,9 +144,15 @@ class RegistrationForm extends React.Component {
           {getFieldDecorator('confirm', {
             rules: [{
               required: true, message: 'Please confirm your password!',
-            }, {
+            }, 
+            {
+              pattern:/((?=.*[\d])(?=.*[^\d])).{8,}|((?=.*[^A-Za-z])(?=.*[a-zA-Z])).{8,}/,
+              message: "密码必须符合复杂性要求"
+            },
+            {
               validator: this.checkPassword,
             }],
+            validateTrigger: "onBlur"
           })(
             <Input type="password" onBlur={this.handleConfirmBlur} />
           )}
@@ -162,7 +162,13 @@ class RegistrationForm extends React.Component {
           label="手机号"
         >
           {getFieldDecorator('phone', {
-            rules: [{ required: true, message: 'Please input your phone number!' }],
+            rules: [{ required: true, message: 'Please input your phone number!' },
+              {
+                pattern:/^1[3258][0-9]{9}$/,
+                message:"手机号码格式不正确"
+              }
+            ],
+            validateTrigger: "onBlur"
           })(
             <Input addonBefore={prefixSelector} style={{ width: '100%' }} />
           )}
@@ -178,39 +184,28 @@ class RegistrationForm extends React.Component {
             }, {
               required: true, message: 'Please input your E-mail!',
             }],
+            validateTrigger: "onBlur"
           })(
             <Input />
           )}
         </FormItem>
         <FormItem
           {...formItemLayout}
-          label="Captcha"
-          extra="We must make sure that your are a human."
+          label="验证码"
         >
-          <Row gutter={8}>
-            <Col span={12}>
               {getFieldDecorator('captcha', {
-                rules: [{ required: true, message: 'Please input the captcha you got!' }],
+                valuePropName: 'checked',
+                initialValue: true,
               })(
-                <Input size="large" />
+                <Input addonAfter={capImg} 
+            placeholder="点击重新获取"/>
               )}
-            </Col>
-            <Col span={12}>
-              <Button size="large">Get captcha</Button>
-            </Col>
-          </Row>
-        </FormItem>
-        <FormItem {...tailFormItemLayout} style={{ marginBottom: 8 }}>
-          {getFieldDecorator('agreement', {
-            valuePropName: 'checked',
-          })(
-            <Checkbox>I have read the <a href="">agreement</a></Checkbox>
-          )}
         </FormItem>
         <FormItem {...tailFormItemLayout}>
           <Button type="primary" htmlType="submit">注册</Button>
         </FormItem>
       </Form>
+      </div>
     );
   }
 }

@@ -1,13 +1,19 @@
 import React, { Component } from 'react';
-import { Menu,Button } from 'antd';
+import history from "../service/history";
+import { Menu,Button,Dropdown } from 'antd';
+import PropTypes from "prop-types";
 import "../css/menu.css";
 import { Link } from "react-router-dom";
-// const SubMenu = Menu.SubMenu;
+ // const SubMenu = Menu.SubMenu;
 // const MenuItemGroup = Menu.ItemGroup;
 const imgs = {
  img1:"imgs/logo.png"
 }
 class AppNav extends Component {
+  static propTypes = {
+    username: PropTypes.string.isRequired,
+    actions: PropTypes.object.isRequired,
+  }
   state = {
     current: 'mail',
   }
@@ -17,8 +23,26 @@ class AppNav extends Component {
       current: e.key,
     });
   }
+  handleLogout(){
+    console.log("logout");
+    this.props.actions.navLogout();
+    history.push("/");
+  }
   render() {
+     console.log(this.props.username)
+    const menum = (
+        <Menu>
+            <Menu.Item key="1">
+              <Link to="/user">用户中心</Link>
+            </Menu.Item>
+            <Menu.Divider/>
+            <Menu.Item key="2">
+              <Button onClick={this.handleLogout.bind(this)}>退出登录</Button>
+            </Menu.Item>
+        </Menu>
+      )
     return (
+      
       <div className="menu">
         <Menu
           onClick={this.handleClick}
@@ -26,7 +50,7 @@ class AppNav extends Component {
           mode="horizontal"
         >
           <Menu.Item key="img">
-            <img src={imgs.img1}/>
+            <img src={imgs.img1} alt={imgs.img1}/>
           </Menu.Item>
           <Menu.Item key="man">
             男子
@@ -37,13 +61,18 @@ class AppNav extends Component {
           <Menu.Item key="childen">
             童装
           </Menu.Item>
-          <Menu.Item key="signup" style={{float:"right",}}>
-           <Link to="/signup"><Button>注册</Button></Link>
-          </Menu.Item>
-          <Menu.Item key="login" style={{float:"right",}}>
-              <Link to="/login"><Button>登录</Button></Link>
-          </Menu.Item>
         </Menu>
+          { this.props.username ?
+            <Dropdown overlay={menum}>
+              <Button icon="user"><span>{this.props.username}</span></Button>
+            </Dropdown>
+            :
+            <div className="user">          
+             <Link to="/signup"><Button className="button-si">注册</Button></Link>
+              <Link to="/login"><Button>登录</Button>
+              </Link>
+            </div>
+          }
       </div>
     );
   }
