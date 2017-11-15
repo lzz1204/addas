@@ -26,3 +26,10 @@
  	float: right;
  	margin-top: -50px;
  }
+ .menu .ant-menu-horizontal .ant-menu-item:hover {
+ 	background: blue;
+ 	color: black;
+ }
+ .menu .ant-menu-horizontal > .ant-menu-item > a{
+ 	    color: white;
+ }

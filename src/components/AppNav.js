@@ -31,12 +31,15 @@ class AppNav extends Component {
   render() {
      console.log(this.props.username)
     const menum = (
-        <Menu>
-            <Menu.Item key="1">
-              <Link to="/user">用户中心</Link>
+        <Menu style={{textAlign: "center"}}>
+            <Menu.Item key="user">
+              <Link to="/user"><Button>用户中心</Button></Link>
+            </Menu.Item>
+            <Menu.Item key="manage">
+              <Link to="/manage"><Button>管理中心</Button></Link>
             </Menu.Item>
             <Menu.Divider/>
-            <Menu.Item key="2">
+            <Menu.Item key="logout">
               <Button onClick={this.handleLogout.bind(this)}>退出登录</Button>
             </Menu.Item>
         </Menu>
@@ -51,6 +54,9 @@ class AppNav extends Component {
         >
           <Menu.Item key="img">
             <img src={imgs.img1} alt={imgs.img1}/>
+          </Menu.Item>
+          <Menu.Item key="home" style={{color:"white"}}>
+            <Link to="/">首页</Link>
           </Menu.Item>
           <Menu.Item key="man">
             男子
